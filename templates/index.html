@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScalableHerokuRag</title>
+    <style>
+        /* Base styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Center content vertically and horizontally */
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Centered container */
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px 30px;  /* Reduced padding for mobile */
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            margin-top: 20px;
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+        }
+
+        /* Heading styling */
+        h1 {
+            font-size: 2.5rem;  /* Reduced size for better mobile compatibility */
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-size: 1.1rem;  /* Adjusted size */
+            font-weight: 400;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Input field styling */
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 1rem;
+            border: 2px solid #dcdcdc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+            transition: border-color 0.3s ease-in-out;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #007aff;
+            background-color: #fff;
+        }
+
+        /* Button styling */
+        button {
+            padding: 14px 32px;
+            font-size: 1.1rem;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;  /* Make button take full width on mobile */
+        }
+
+        button:hover {
+            background-color: #005bb5;
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            background-color: #003d8e;
+            transform: translateY(1px);
+        }
+
+        /* Response styling */
+        .response {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            padding: 16px;
+            background-color: #f1f1f1;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        /* Keyframes for fade-in effect */
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .spinner {
+            margin: 40px auto;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Context container */
+        .context {
+            background-color: #fafafa; /* Lighter background */
+            padding: 25px;
+            margin-top: 30px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            display: none;
+            max-height: 350px;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Context item styling */
+        .context-item {
+            margin-bottom: 15px;
+            padding: 20px;
+            background-color: #f0f9ff; /* Softer light blue */
+            border-radius: 12px;
+            border: 1px solid #d1e8ff;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Hover effect for context items */
+        .context-item:hover {
+            background-color: #e6f7ff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Metadata styling */
+        .context-item .metadata {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        /* Content styling for context documents */
+        .context-item div {
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.6;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .footer a {
+            text-decoration: none;
+            color: #007aff;
+        }
+
+        /* Ensure full page responsiveness */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2rem; /* Adjusted to fit smaller screens */
+            }
+
+            h2 {
+                font-size: 1rem;  /* Adjusted to fit smaller screens */
+            }
+
+            .container {
+                padding: 20px 15px;  /* Reduced padding for small screens */
+            }
+
+            button {
+                padding: 12px;
+            }
+
+            input[type="text"] {
+                padding: 12px;
+                font-size: 1rem;
+            }
+
+            .response {
+                padding: 12px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ScalableHerokuRag</h1>
+        <h2>Ask me anything, and I'll provide an answer from my knowledge base.</h2>
+
+        <input type="text" id="userInput" placeholder="Ask something..." autofocus>
+        <button onclick="sendRequest()">Submit</button>
+
+        <div id="response" class="response"></div>
+        <div id="context" class="context"></div>
+
+        <div class="footer">
+            <p>Made with ❤️ by <a href="https://www.linkedin.com/in/raffaele-russo99/" target="_blank">Raffaele Russo</a></p>
+        </div>
+    </div>
+
+    <script>
+        async function sendRequest() {
+            const userInput = document.getElementById("userInput").value;
+            const responseDiv = document.getElementById("response");
+
+            if (!userInput.trim()) {
+                alert("Please enter something!");
+                return;
+            }
+
+            // Show loading spinner
+            responseDiv.style.display = "block";
+            responseDiv.innerHTML = "<div class='spinner'></div>";
+
+            try {
+                const response = await fetch("/invoke", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ input: userInput })
+                });
+
+                const result = await response.json();
+                if(result.error){
+                    responseDiv.innerHTML = result.error;
+                }else{
+                    var taskId = result.task_id;
+                    console.log("taskId: ",taskId)
+                    checkTaskStatus(taskId);
+                }
+            } catch (error) {
+                responseDiv.innerHTML = "Sorry, something went wrong.";
+            }
+        }
+    
+        function checkTaskStatus(taskId) {
+            const responseDiv = document.getElementById("response");
+            const contextDiv = document.getElementById("context");
+            
+            var intervalId = setInterval(function () {
+                fetch("/check_task/" + taskId)
+                    .then(response => response.json())
+                    .then(response => {
+                        console.log("Response from /check_task:", response);
+
+                        if (response["status"] === "pending") {
+                            console.log("Task still pending...");
+                        } else if (response["status"] === "completed") {
+                            console.log("Task ready, stopping polling...");
+                            clearInterval(intervalId);
+                            
+                            responseDiv.innerHTML = response["llm_response"].answer;
+
+                            // Handle context
+                            const context = response["llm_response"].context;
+                            if (context && context.length > 0) {
+                                contextDiv.style.display = "block";
+                                contextDiv.innerHTML = "";
+                                
+                                context.forEach(doc => {
+                                    const contextItem = document.createElement("div");
+                                    contextItem.classList.add("context-item");
+
+                                    const metadataDiv = document.createElement("div");
+                                    metadataDiv.classList.add("metadata");
+                                    metadataDiv.innerHTML = `<strong>Extract from page ${doc.page}</strong>`;
+                                    contextItem.appendChild(metadataDiv);
+
+                                    const contentDiv = document.createElement("div");
+                                    contentDiv.innerText = doc.page_content;
+                                    contextItem.appendChild(contentDiv);
+
+                                    contextDiv.appendChild(contextItem);
+                                });
+                            } else {
+                                contextDiv.style.display = "none";
+                            }
+                        } else if (response["status"] === "failed") {
+                            clearInterval(intervalId);
+                            responseDiv.innerHTML = "Task failed. Please try again.";
+                            contextDiv.style.display = "none";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error while checking task status:", error);
+                        clearInterval(intervalId);
+
+                        responseDiv.innerHTML = "Sorry, something went wrong.";
+                        contextDiv.style.display = "none";
+                    });
+            }, 3000); // Poll every 3 seconds
+        }
+    </script>
+</body>
+</html>
